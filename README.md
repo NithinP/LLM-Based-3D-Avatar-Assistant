@@ -113,10 +113,20 @@ https://ieeexplore.ieee.org/document/10576146
 ## How to run
 
 1.Create a new project in unity with URP Settings
+<br>
+<br>
 2.Replace the assets folder with the one in this branch
+<br>
+<br>
 3.Open the Unity Scene
+<br>
+<br>
 4.Run the STT service using python STT.py
+<br>
+<br>
 5.Launch the app by clicking on the play button
+<br>
+<br>
 6.Say 'Start' to activate or 'Stop' to deactivate works like an OS
 
 
