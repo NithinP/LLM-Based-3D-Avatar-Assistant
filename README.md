@@ -12,9 +12,9 @@
     <br />
     <br />
     ·
-    <a href="https://github.com/NeuralHarbour/LLM-Based-3D-Avatar-Assistant/v2.0/issues">Report Bug</a>
+    <a href="https://github.com/NeuralHarbour/LLM-Based-3D-Avatar-Assistant/issues">Report Bug</a>
     ·
-    <a href="https://github.com/NeuralHarbour/LLM-Based-3D-Avatar-Assistant/v2.0/issues">Request Feature</a>
+    <a href="https://github.com/NeuralHarbour/LLM-Based-3D-Avatar-Assistant/issues">Request Feature</a>
   </p>
 </div>
 
@@ -109,6 +109,18 @@ https://ieeexplore.ieee.org/document/10576146
 3. [Install CUDA 11.7 if you have an Nvidia GPU](https://developer.nvidia.com/cuda-11-7-0-download-archive?target_os=Windows&target_arch=x86_64&target_version=10&target_type=exe_local)
 4. [Install Visual Studio Community 2022](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community&channel=Release&version=VS2022&source=VSLandingPage&cid=2030&passive=false) and select `Desktop Development with C++` in the install options
 5. [Install Unity]
+
+## How to run
+
+1.Create a new project in unity with URP Settings
+2.Replace the assets folder with the one in this branch
+3.Open the Unity Scene
+4.Run the STT service using python STT.py
+5.Launch the app by clicking on the play button
+6.Say 'Start' to activate or 'Stop' to deactivate works like an OS
+
+
+Compiled EXE version coming soon !!!
 
 <!-- ROADMAP -->
 ## Roadmap
