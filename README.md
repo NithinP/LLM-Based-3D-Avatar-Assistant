@@ -2,7 +2,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/NeuralHarbour/LLM-Based-3D-Avatar-Assistant/v2.0">
-    <img src="Images/logo.png" alt="Logo" width="1000" height="200">
+    <img src="Images/logo.png" alt="Logo" width="1500" height="250">
   </a>
 
   <h3 align="center">LLM Based Holographic Assistant</h3>
@@ -18,7 +18,11 @@
   </p>
 </div>
 
-
+<p align="center">
+  <a href="https://count.getloli.com" target="_blank">
+    <img alt="Moe Counter!" src="https://count.getloli.com/@Moe-counter.github?name=Moe-counter.github&theme=booru-lewd&padding=7&offset=7&align=top&scale=1&pixelated=0&darkmode=auto">
+  </a>
+</p>
 
 <!-- TABLE OF CONTENTS -->
 <details>
