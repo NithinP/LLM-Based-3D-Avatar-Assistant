@@ -72,7 +72,7 @@ More features I'm planning to add soon in the [Roadmap](https://github.com/Neura
 
 First the speech which is obtained from the mic is first passed into the OpenAI Whisper model for detecting the language of the speech and then its passed on to the speech recognizer, 
 the response is then sent to the client via a websocket, the transcribed text is then sent to gemini LLM, and the response from Jenna is printed to the unity console and appended to conversation_log.json, 
-and finally, the response is spoken by our finedtuned Parler TTS.
+and finally, the response is spoken by our finedtuned Parler TTS with the expressions for the face of the character and voice and the animation will be dynamically generated for the character by our own custom animation model which we are currently working on. For the time being we are using preset animations.
 
 Created Based on our publication
 https://ieeexplore.ieee.org/document/10576146
@@ -137,11 +137,10 @@ Compiled EXE version coming soon !!!
 
 - [x] Long-term memory
 - [x] Time and date awareness
-- [ ] Virtual reality / augmented reality / mixed reality integration
+- [ ] mixed reality integration
 - [x] Gatebox-style hologram
 - [x] Dynamic Voice like GPT4o
-- [ ] Animatronic body
-- [x] Alexa-like smart home control
+- [ ] Alexa-like smart home control
 - [x] Multilingual
 - [ ] Mobile version
 - [x] Easier setup
@@ -154,6 +153,10 @@ Compiled EXE version coming soon !!!
 - [ ] Different modes
 - [ ] Face Recognition
 - [ ] Dynamic Animations
+- [X] OS like working
+- [X] Wakeword detection
+- [ ] Mood recognition
+- [ ] Weather Forecast
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
