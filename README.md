@@ -112,28 +112,28 @@ https://ieeexplore.ieee.org/document/10576146
 
 ## How to run
 
-1.Create a new project in unity with URP Settings
+1. Create a new project in unity with URP Settings
 <br>
 <br>
-2.Replace the assets folder with the one in this branch
+2. Replace the assets folder with the one in this branch
 <br>
 <br>
-3.Open the Unity Scene
+3. Open the Unity Scene
 <br>
 <br>
 4. Insert the API keys for Gemini and wolfram alpha
 <br>
 <br>
-5.Run the STT service using python STT.py
+5. Run the STT service using python STT.py
 <br>
 <br>
-6.Launch the app by clicking on the play button
+6. Launch the app by clicking on the play button
 <br>
 <br>
-7.Wait for the application to download the required models on the first start
+7. Wait for the application to download the required models on the first start
 <br>
 <br>
-8.Say 'Start' to activate or 'Stop' to deactivate works like an OS
+8. Say 'Start' to activate or 'Stop' to deactivate works like an OS
 <br>
 <br>
 
