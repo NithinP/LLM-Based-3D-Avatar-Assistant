@@ -170,6 +170,7 @@ Distributed under the GNU General Public License v3.0 License. See `LICENSE.txt`
 ## Contact and Socials
 
 E-mail: johnk4590@gmail.com
+<br>
 Project Link: [https://github.com/NeuralHarbour/LLM-Based-3D-Avatar-Assistant/v2.0](github.com/NeuralHarbour/LLM-Based-3D-Avatar-Assistant/v2.0)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
