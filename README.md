@@ -139,6 +139,7 @@ Compiled EXE version coming soon !!!
 - [x] Time and date awareness
 - [ ] Virtual reality / augmented reality / mixed reality integration
 - [x] Gatebox-style hologram
+- [x] Dynamic Voice like GPT4o
 - [ ] Animatronic body
 - [x] Alexa-like smart home control
 - [x] Multilingual
@@ -152,6 +153,7 @@ Compiled EXE version coming soon !!!
 - [ ] Music Player
 - [ ] Different modes
 - [ ] Face Recognition
+- [ ] Dynamic Animations
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
