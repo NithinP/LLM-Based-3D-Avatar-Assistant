@@ -121,14 +121,21 @@ https://ieeexplore.ieee.org/document/10576146
 3.Open the Unity Scene
 <br>
 <br>
-4.Run the STT service using python STT.py
+4. Insert the API keys for Gemini and wolfram alpha
 <br>
 <br>
-5.Launch the app by clicking on the play button
+5.Run the STT service using python STT.py
 <br>
 <br>
-6.Say 'Start' to activate or 'Stop' to deactivate works like an OS
-
+6.Launch the app by clicking on the play button
+<br>
+<br>
+7.Wait for the application to download the required models on the first start
+<br>
+<br>
+8.Say 'Start' to activate or 'Stop' to deactivate works like an OS
+<br>
+<br>
 
 Compiled EXE version coming soon !!!
 
