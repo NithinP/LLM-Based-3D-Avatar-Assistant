@@ -86,21 +86,27 @@ https://ieeexplore.ieee.org/document/10576146
 4. [Install Visual Studio Community 2022](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community&channel=Release&version=VS2022&source=VSLandingPage&cid=2030&passive=false) and select `Desktop Development with C++` in the install options
 5. Install Unity
 
-## How to run
+## How to run / Steps to reproduce
 <br>
 1. Create a new project in unity with URP Settings
 <br>
 <br>
+<img src="Images/Step1.png" alt="Step1" width="900" height="480">
+<br>
 2. Replace the assets folder with the one in this branch
 <br>
 <br>
-3. Open the Unity Scene
+3. Open the Unity Scene from the scenes folder
 <br>
 <br>
-4. Insert the API keys for Gemini and wolfram alpha
+<img src="Images/Step3.png" alt="Step3" width="900" height="480">
+<br>
+4. Insert the API keys into the .env files
 <br>
 <br>
-5. Run the STT service using python STT.py
+<img src="Images/Step4.png" alt="Step4" width="900" height="480">
+<br>
+5. Run the STT service using: <strong>python STT.py</strong>
 <br>
 <br>
 6. Launch the app by clicking on the play button
@@ -111,6 +117,8 @@ https://ieeexplore.ieee.org/document/10576146
 <br>
 8. Say 'Start' to activate or 'Stop' to deactivate works like an OS
 <br>
+<br>
+<img src="Images/Output.png" alt="output" width="280" height="500">
 <br>
 
 Compiled EXE version coming soon !!!
