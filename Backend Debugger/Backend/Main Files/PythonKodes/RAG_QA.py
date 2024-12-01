@@ -16,8 +16,12 @@ from langchain_community.tools import DuckDuckGoSearchRun, WikipediaQueryRun
 from langchain_community.utilities import WikipediaAPIWrapper
 from langchain_community.utilities.wolfram_alpha import WolframAlphaAPIWrapper
 from langchain_core.runnables.history import RunnableWithMessageHistory
+import os
+from dotenv import load_dotenv
 
 try:
+    load_dotenv()
+    wolfram_api_key = os.getenv("WOLFRAM_ALPHA_API_KEY")
     base_data_path = Path("D:/3DavatarAssistant/Backend/Client/Client Side/Assets/Scripts/PythonSkriptz/BASE_DATA.py")
 
     # Set up path and import BASE_DATA
@@ -32,7 +36,7 @@ try:
     g_c.history = g_c.load_memory_from_json('conversation_log.json')
 
     # Set up API keys and tools
-    os.environ["WOLFRAM_ALPHA_APPID"] = "WPLQE3-XRWLLJ2JL4"
+    os.environ["WOLFRAM_ALPHA_APPID"] = wolfram_api_key
     search = DuckDuckGoSearchRun()
     wikipedia = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
     wolfram = WolframAlphaAPIWrapper()

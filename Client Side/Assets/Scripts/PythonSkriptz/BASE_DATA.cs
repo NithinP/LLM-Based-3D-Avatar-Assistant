@@ -35,8 +35,12 @@ public class MenuItem_KODEZ_Class
             from datetime import datetime
             from langchain_core.runnables.history import RunnableWithMessageHistory
             import UnityEngine
+            import os
+            from dotenv import load_dotenv
 
             try:
+                load_dotenv(dotenv_path=""D:/3DavatarAssistant/Backend/Client/Client Side/Assets/Scripts/PythonSkriptz/API_KEYS.env)
+                wolfram_api_key = os.environ.get(""WOLFRAM_ALPHA_API_KEY"")
                 input_text = " + $"\"{inputText.Replace("\"", "\\\"")}\"" + @"
                 base_data_path = Path(""D:/3DavatarAssistant/Backend/Client/Client Side/Assets/Scripts/PythonSkriptz/BASE_DATA.py"")
 
@@ -51,7 +55,7 @@ public class MenuItem_KODEZ_Class
 
                 g_c.history = g_c.load_memory_from_json('conversation_log.json')
 
-                os.environ[""WOLFRAM_ALPHA_APPID""] = ""WPLQE3-XRWLLJ2JL4""
+                os.environ[""WOLFRAM_ALPHA_APPID""] = wolfram_api_key
 
                 search = DuckDuckGoSearchRun()
                 wikipedia = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())

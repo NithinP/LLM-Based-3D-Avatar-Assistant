@@ -27,7 +27,7 @@ load_dotenv()
 
 # Spotify configs
 
-client_credentials_manager = SpotifyClientCredentials(client_id='01730ca7d7ef4e4fbf322cc7a448837f', client_secret='9e411e7c13b24d119f0bbb4228a86aec')
+client_credentials_manager = SpotifyClientCredentials(client_id=os.environ.get('SPOTIFY_KLIENT_ID'), client_secret=os.environ.get('SPOTIFY_KLIENT_SECRET'))
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
