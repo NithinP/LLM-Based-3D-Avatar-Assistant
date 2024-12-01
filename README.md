@@ -148,7 +148,7 @@ Compiled EXE version coming soon !!!
 <!-- LICENSE -->
 ## License
 
-Distributed under the GNU General Public License v3.0 License. See `LICENSE.txt` for more information.
+Distributed under the GNU Affero General Public License v3.0 License. See `LICENSE.txt` for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
