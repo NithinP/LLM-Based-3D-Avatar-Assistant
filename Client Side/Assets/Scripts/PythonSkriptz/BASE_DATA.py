@@ -6,11 +6,9 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 
-# Initialize chat history and memory
 history = ChatMessageHistory()
 memory = ConversationBufferMemory(return_messages=True, chat_memory=history, memory_key="chat_history")
 
-# Load environment variables
 load_dotenv(dotenv_path="D:/3DavatarAssistant/Backend/Client/Client Side/Assets/Scripts/PythonSkriptz/API_KEYS.env")
 google_api_key = os.environ.get("GOOGLE_API_KEY")
 
@@ -18,10 +16,9 @@ if not google_api_key:
     raise ValueError("GOOGLE_API_KEY not found in the .env file. Please ensure it's set.")
 
 
-# Initialize the LLM
 llm = ChatGoogleGenerativeAI(
     model="gemini-pro", 
-    google_api_key=google_api_key,  # Fixed variable name
+    google_api_key=google_api_key,
     temperature=0.3,
     max_retries=3
 )

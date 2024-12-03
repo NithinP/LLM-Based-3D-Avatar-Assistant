@@ -70,6 +70,7 @@ public class AutoDetectVoice : MonoBehaviour
     [SerializeField] private GameObject reactionImage;
     [SerializeField] private GameObject _KUBES;
     [SerializeField] private GameObject _RECOG;
+    Integrity_Loader IL;
 
     private float _sustainedTime = 0f;
     private float _requiredSustainTime =1f;
@@ -79,6 +80,7 @@ public class AutoDetectVoice : MonoBehaviour
     {
         audioSource = GetComponent<AudioSource>();
         socket = FindObjectOfType<WsClient>();
+        IL = FindObjectOfType<Integrity_Loader>();
         AudioProfile(_audioProfile);
         can_record = true;
         if (can_record)
@@ -92,7 +94,10 @@ public class AutoDetectVoice : MonoBehaviour
     void Update()
     {
         if (can_record && !_isSetup)
+        {
+            Debug.Log("Starting Service");
             SetupService(_autoDetectVoice);
+        }
 
         if (_autoDetectVoice && microphoneActive)
         {
@@ -103,7 +108,7 @@ public class AutoDetectVoice : MonoBehaviour
             DetectAudio();
             GetAmplitude();
         }
-        if (_AmplitudeBuffer > _amplitudeThreshold)
+        if (_AmplitudeBuffer > _amplitudeThreshold && IL != null && IL.End_Flag)
         {
             _sustainedTime += Time.deltaTime;
             if (_sustainedTime >= _requiredSustainTime && !_currentlyActive)
@@ -116,7 +121,7 @@ public class AutoDetectVoice : MonoBehaviour
         else
         {
             _sustainedTime -= Time.deltaTime;
-            if (_sustainedTime <= 0 && _currentlyActive)
+            if (_sustainedTime <= 0 && _currentlyActive && IL != null && IL.End_Flag)
             {
                 _currentlyActive = false;
                 if (!_inRecognitionPhase)
@@ -308,7 +313,7 @@ public class AutoDetectVoice : MonoBehaviour
 
         if (maxVolume > _minimumSpeakingSampleValue)
         {
-            if (!_audioDetected)
+            if (!_audioDetected && IL != null && IL.End_Flag)
             {
                 if (!_requestNeedsSending)
                 {
@@ -325,7 +330,7 @@ public class AutoDetectVoice : MonoBehaviour
                 _timeAtSilenceBegan = Time.time;
                 _audioDetected = false;
             }
-            else if (_requestNeedsSending)
+            else if (_requestNeedsSending && IL != null && IL.End_Flag)
             {
                 if (Time.time - _timeAtSilenceBegan > _silenceTimer)
                 {

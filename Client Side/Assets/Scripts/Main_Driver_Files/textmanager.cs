@@ -17,6 +17,7 @@ public class TextManager : MonoBehaviour
     private float lastKeyPressTime;
     private bool processNextMessage = false;
     WsClient wsock;
+    Integrity_Loader IL;
 
     string receivedText = "";
     string language = "";
@@ -34,74 +35,79 @@ public class TextManager : MonoBehaviour
         wsock = FindObjectOfType<WsClient>();
         displayText.gameObject.SetActive(false);
         wakeWordPromptText.gameObject.SetActive(false);
+        IL = FindObjectOfType<Integrity_Loader>();
+
     }
 
     void Update()
     {
-        HandleCheatCodes();
-        currentReceivedText = ws.receivedText;
-        language = ws.language;
-        if (!string.IsNullOrEmpty(currentReceivedText))
+        if (IL.End_Flag)
         {
-            if (currentReceivedText != previousText)
+            HandleCheatCodes();
+            currentReceivedText = ws.receivedText;
+            language = ws.language;
+            if (!string.IsNullOrEmpty(currentReceivedText))
             {
-                Debug.Log("Detected Language : " + language);
-                Debug.Log("Received Response: " + currentReceivedText);
+                if (currentReceivedText != previousText)
+                {
+                    Debug.Log("Detected Language : " + language);
+                    Debug.Log("Received Response: " + currentReceivedText);
 
-               
-                if (currentReceivedText.ToLower() == "start" && language == "en")
-                {
-                    SetSystemState(true);
-                    HideWakeWordPrompt();
-                    Debug.Log("System activated! Waiting for the next command.");
 
-                }
-                else if (!isSystemActive)
-                {
-                    ShowWakeWordPrompt();
-                }
-                else if (wakewordDetected && processNextMessage)
-                {
-                    processNextMessage = false;
-                    HideWakeWordPrompt();
-                    DisplayText(currentReceivedText, displayText, 5f, 36);
-                    //wsock.SendInputToSecondaryServer(currentReceivedText);
-                    if ((currentReceivedText.ToLower() == "quit" || currentReceivedText.ToLower() == "stop"))
+                    if (currentReceivedText.ToLower() == "start" && language == "en")
                     {
-                        SetSystemState(false);
+                        SetSystemState(true);
                         HideWakeWordPrompt();
-                    }
-                    else
-                    {
-                        string classifiedIntent = MenuItem_KODEZ_Class.Intent_Classifier(currentReceivedText);
-                        Debug.Log($"Classified Intent: {classifiedIntent}");
-                        intent = classifiedIntent;
+                        Debug.Log("System activated! Waiting for the next command.");
 
                     }
+                    else if (!isSystemActive)
+                    {
+                        ShowWakeWordPrompt();
+                    }
+                    else if (wakewordDetected && processNextMessage)
+                    {
+                        processNextMessage = false;
+                        HideWakeWordPrompt();
+                        DisplayText(currentReceivedText, displayText, 5f, 36);
+                        //wsock.SendInputToSecondaryServer(currentReceivedText);
+                        if ((currentReceivedText.ToLower() == "quit" || currentReceivedText.ToLower() == "stop"))
+                        {
+                            SetSystemState(false);
+                            HideWakeWordPrompt();
+                        }
+                        else
+                        {
+                            string classifiedIntent = MenuItem_KODEZ_Class.Intent_Classifier(currentReceivedText);
+                            Debug.Log($"Classified Intent: {classifiedIntent}");
+                            intent = classifiedIntent;
+
+                        }
+                    }
+                    else if (wakewordDetected)
+                    {
+                        DisplayText(currentReceivedText, displayText, 5f, 36);
+                        //wsock.SendInputToSecondaryServer(currentReceivedText);
+                        if ((currentReceivedText.ToLower() == "quit" || currentReceivedText.ToLower() == "stop"))
+                        {
+                            SetSystemState(false);
+                            HideWakeWordPrompt();
+                        }
+                        else
+                        {
+                            string classifiedIntent = MenuItem_KODEZ_Class.Intent_Classifier(currentReceivedText);
+                            Debug.Log($"Classified Intent: {classifiedIntent}"); // Debug log to verify intent
+                            intent = classifiedIntent;
+                        }
+                    }
+                    previousText = currentReceivedText;
                 }
-                else if (wakewordDetected)
+                else if (isSystemActive && wakewordDetected && !processNextMessage)
                 {
                     DisplayText(currentReceivedText, displayText, 5f, 36);
-                    //wsock.SendInputToSecondaryServer(currentReceivedText);
-                    if ((currentReceivedText.ToLower() == "quit" || currentReceivedText.ToLower() == "stop"))
-                    {
-                        SetSystemState(false);
-                        HideWakeWordPrompt();
-                    }
-                    else
-                    {
-                        string classifiedIntent = MenuItem_KODEZ_Class.Intent_Classifier(currentReceivedText);
-                        Debug.Log($"Classified Intent: {classifiedIntent}"); // Debug log to verify intent
-                        intent = classifiedIntent;
-                    }
                 }
-                previousText = currentReceivedText;
+                ws.receivedText = null;
             }
-            else if (isSystemActive && wakewordDetected && !processNextMessage)
-            {
-                DisplayText(currentReceivedText, displayText, 5f, 36);
-            }
-            ws.receivedText = null;
         }
     }
 
