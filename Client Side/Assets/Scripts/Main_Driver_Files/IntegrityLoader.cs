@@ -3,12 +3,14 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 using System.IO;
+using System.Linq;
 
 public class Integrity_Loader : MonoBehaviour
 {
     [SerializeField] Image CircleImg;
     [SerializeField] TextMeshProUGUI txtProgress;
     [SerializeField] TextMeshProUGUI LoadText;
+
 
     [SerializeField][Range(0, 1)] float progress = 0f;
     [SerializeField] float fadeOutTime = 1f;
@@ -22,6 +24,9 @@ public class Integrity_Loader : MonoBehaviour
         "Assets/Animations",
         "Assets/Fonts",
     };
+
+   
+
 
     void Start()
     {
@@ -47,6 +52,26 @@ public class Integrity_Loader : MonoBehaviour
 
     IEnumerator LoadAssetsAsync()
     {
+
+        string[] filesToCheck = new string[]
+        {
+            "../Models/File1.txt",
+            "../Models/File2.extension",
+            "../Models/File3.extension"
+        };
+
+        var missingFiles = filesToCheck
+            .Where(checkFile => !File.Exists(Path.Combine(Application.dataPath, checkFile)))
+            .ToArray();
+
+        if (missingFiles.Length > 0)
+        {
+            foreach (var missingFile in missingFiles)
+            {
+                Debug.LogWarning($"Missing file: {missingFile}");
+            }
+        }
+
         int totalFiles = 0;
         foreach (string folderPath in assetPaths)
         {
@@ -55,27 +80,22 @@ public class Integrity_Loader : MonoBehaviour
         }
 
         float elapsedTime = 0f;
-
         float baseProgress = 0.05f;
         progress = baseProgress;
         LoadText.text = "Loading Assets";
         LoadText.fontSize = 36;
+
         foreach (string folderPath in assetPaths)
         {
             string[] files = Directory.GetFiles(folderPath);
-
-            foreach (string filePath in files)
+            foreach (string currentFilePath in files)
             {
                 yield return null;
-
                 elapsedTime += Time.deltaTime;
                 progress = baseProgress + (elapsedTime / totalFiles);
-
                 CircleImg.fillAmount = progress;
-
                 int percentage = Mathf.RoundToInt(progress * 100f);
                 txtProgress.text = percentage.ToString();
-
                 yield return new WaitForSeconds(0.1f);
             }
         }
