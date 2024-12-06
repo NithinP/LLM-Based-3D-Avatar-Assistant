@@ -4,7 +4,12 @@ using TMPro;
 using System.Collections;
 using System.IO;
 using System.Linq;
-
+using UnityEngine.Networking;
+using System.IO.Compression;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using Debug = UnityEngine.Debug;
 public class Integrity_Loader : MonoBehaviour
 {
     [SerializeField] Image CircleImg;
@@ -52,31 +57,35 @@ public class Integrity_Loader : MonoBehaviour
 
     IEnumerator LoadAssetsAsync()
     {
-
-        string[] filesToCheck = new string[]
+        // Mapping of folders to their sources
+        var folderSources = new Dictionary<string, string>
         {
-            "../Models/File1.txt",
-            "../Models/File2.extension",
-            "../Models/File3.extension"
+            { "../Models/XLMRoberta-Alexa-Intents-Classification", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification" }
         };
 
-        var missingFiles = filesToCheck
-            .Where(checkFile => !File.Exists(Path.Combine(Application.dataPath, checkFile)))
-            .ToArray();
+        // Check for missing folders
+        var missingFolders = folderSources
+            .Where(pair => !Directory.Exists(Path.Combine(Application.dataPath, pair.Key)))
+            .ToList();
 
-        if (missingFiles.Length > 0)
+        if (missingFolders.Count > 0)
         {
-            foreach (var missingFile in missingFiles)
+            foreach (var missingFolder in missingFolders)
             {
-                Debug.LogWarning($"Missing file: {missingFile}");
+                Debug.LogWarning($"Missing folder: {missingFolder.Key}");
+                yield return StartCoroutine(DownloadFolder(missingFolder.Key, missingFolder.Value));
             }
         }
 
+        // Proceed with asset loading as usual
         int totalFiles = 0;
         foreach (string folderPath in assetPaths)
         {
-            string[] files = Directory.GetFiles(folderPath);
-            totalFiles += files.Length;
+            if (Directory.Exists(folderPath))
+            {
+                string[] files = Directory.GetFiles(folderPath);
+                totalFiles += files.Length;
+            }
         }
 
         float elapsedTime = 0f;
@@ -87,60 +96,69 @@ public class Integrity_Loader : MonoBehaviour
 
         foreach (string folderPath in assetPaths)
         {
-            string[] files = Directory.GetFiles(folderPath);
-            foreach (string currentFilePath in files)
+            if (Directory.Exists(folderPath))
             {
-                yield return null;
-                elapsedTime += Time.deltaTime;
-                progress = baseProgress + (elapsedTime / totalFiles);
-                CircleImg.fillAmount = progress;
-                int percentage = Mathf.RoundToInt(progress * 100f);
-                txtProgress.text = percentage.ToString();
-                yield return new WaitForSeconds(0.1f);
+                string[] files = Directory.GetFiles(folderPath);
+                foreach (string currentFilePath in files)
+                {
+                    yield return null;
+                    elapsedTime += Time.deltaTime;
+                    progress = baseProgress + (elapsedTime / totalFiles);
+                    CircleImg.fillAmount = progress;
+                    int percentage = Mathf.RoundToInt(progress * 100f);
+                    txtProgress.text = percentage.ToString();
+                    yield return new WaitForSeconds(0.1f);
+                }
             }
         }
-        float previousProgress = progress;
-        float finalIntegrityCheckProgress = previousProgress;
-        yield return StartCoroutine(DummyIntegrityCheck(previousProgress));
+    }
 
 
-        progress = previousProgress;
-        CircleImg.fillAmount = progress;
+    IEnumerator DownloadFolder(string folderPath, string repoUrl)
+    {
+        Debug.Log($"Cloning repository: {repoUrl}");
 
-        progress = 1f;
-        CircleImg.fillAmount = progress;
-        txtProgress.text = "100";
-        LoadText.text = "Done";
+        string fullPath = Path.Combine(Directory.GetParent(Directory.GetParent(Application.dataPath).FullName).FullName, "models", folderPath);
+        Debug.Log($"Full clone path: {fullPath}");
 
-        yield return new WaitForSeconds(fadeOutTime);
-        End_Flag = true;
-        Debug.Log("LOADING COMPLETE");
-        CanvasGroup canvasGroup = gameObject.GetComponent<CanvasGroup>();
-        if (canvasGroup == null)
+        // Create the directory if it doesn't exist
+        if (!Directory.Exists(fullPath))
         {
-            canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            Directory.CreateDirectory(fullPath);
         }
 
-        float currentTime = 0f;
-        while (currentTime < fadeOutTime)
+        // Run the git clone command using a process
+        var process = new Process
         {
-            float alpha = Mathf.Lerp(1f, 0f, currentTime / fadeOutTime);
-            canvasGroup.alpha = alpha;
-            CircleImg.color = new Color(CircleImg.color.r, CircleImg.color.g, CircleImg.color.b, alpha);
-            txtProgress.color = new Color(txtProgress.color.r, txtProgress.color.g, txtProgress.color.b, alpha);
-            LoadText.color = new Color(LoadText.color.r, LoadText.color.g, LoadText.color.b, alpha);
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "git",
+                Arguments = $"clone --depth 1 {repoUrl} \"{fullPath}\"",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
 
-            currentTime += Time.deltaTime;
+        process.Start();
+
+        // Read output and error streams asynchronously to prevent blocking
+        while (!process.HasExited)
+        {
+            Debug.Log(process.StandardOutput.ReadLine());
+            Debug.LogError(process.StandardError.ReadLine());
             yield return null;
         }
 
-        canvasGroup.alpha = 0f;
-        CircleImg.color = new Color(CircleImg.color.r, CircleImg.color.g, CircleImg.color.b, 0f);
-        LoadText.color = new Color(LoadText.color.r, LoadText.color.g, LoadText.color.b, 0f);
-        CircleImg.gameObject.SetActive(false);
-        txtProgress.gameObject.SetActive(false);
-        LoadText.gameObject.SetActive(false);
-
+        if (process.ExitCode == 0)
+        {
+            Debug.Log("Repository cloned successfully.");
+        }
+        else
+        {
+            Debug.LogError($"Failed to clone repository. Exit code: {process.ExitCode}");
+        }
     }
 
     IEnumerator DummyIntegrityCheck(float startingProgress)
