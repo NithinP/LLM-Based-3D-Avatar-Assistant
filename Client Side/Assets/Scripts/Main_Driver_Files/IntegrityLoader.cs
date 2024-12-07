@@ -10,16 +10,15 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Debug = UnityEngine.Debug;
+
 public class Integrity_Loader : MonoBehaviour
 {
     [SerializeField] Image CircleImg;
     [SerializeField] TextMeshProUGUI txtProgress;
     [SerializeField] TextMeshProUGUI LoadText;
 
-
     [SerializeField][Range(0, 1)] float progress = 0f;
     [SerializeField] float fadeOutTime = 1f;
-
 
     public bool End_Flag = false;
     public bool bypass;
@@ -30,8 +29,9 @@ public class Integrity_Loader : MonoBehaviour
         "Assets/Fonts",
     };
 
-   
-
+    [SerializeField] Slider downloadProgressSlider;
+    [SerializeField] TextMeshProUGUI downloadProgressText;
+    [SerializeField] TextMeshProUGUI downloadText;
 
     void Start()
     {
@@ -42,6 +42,9 @@ public class Integrity_Loader : MonoBehaviour
             CircleImg.gameObject.SetActive(true);
             txtProgress.gameObject.SetActive(true);
             LoadText.gameObject.SetActive(true);
+            downloadProgressSlider.gameObject.SetActive(false);
+            downloadProgressText.gameObject.SetActive(false);
+            downloadText.gameObject.SetActive(false);
 
             StartCoroutine(CheckInternetAndLoadAssets());
         }
@@ -52,32 +55,38 @@ public class Integrity_Loader : MonoBehaviour
         yield return new WaitForSeconds(3f);
         CircleImg.fillAmount = 0.05f;
         txtProgress.text = "5";
+        LoadText.text = "Checking For Resources";
+        yield return new WaitForSeconds(5f);
         yield return StartCoroutine(LoadAssetsAsync());
     }
 
     IEnumerator LoadAssetsAsync()
     {
-        // Mapping of folders to their sources
-        var folderSources = new Dictionary<string, string>
+        var fileSources = new Dictionary<string, string>
         {
-            { "../Models/XLMRoberta-Alexa-Intents-Classification", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification" }
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/pytorch_model.bin", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/pytorch_model.bin" },
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/optimizer.pt", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/optimizer.pt" }
         };
 
-        // Check for missing folders
-        var missingFolders = folderSources
-            .Where(pair => !Directory.Exists(Path.Combine(Application.dataPath, pair.Key)))
+        string modelsFolderPath = Path.Combine(Application.dataPath, "..", "models");
+
+        var missingFiles = fileSources
+            .Where(pair => !File.Exists(Path.Combine(modelsFolderPath, pair.Key)))
             .ToList();
 
-        if (missingFolders.Count > 0)
+        Debug.Log($"Total missing files to download: {missingFiles.Count}");
+
+        if (missingFiles.Count > 0)
         {
-            foreach (var missingFolder in missingFolders)
+            for (int i = 0; i < missingFiles.Count; i++)
             {
-                Debug.LogWarning($"Missing folder: {missingFolder.Key}");
-                yield return StartCoroutine(DownloadFolder(missingFolder.Key, missingFolder.Value));
+                var missingFile = missingFiles[i];
+                Debug.LogWarning($"Missing file: {missingFile.Key}");
+
+                yield return StartCoroutine(DownloadFile(missingFile.Key, missingFile.Value, i, missingFiles.Count));
             }
         }
 
-        // Proceed with asset loading as usual
         int totalFiles = 0;
         foreach (string folderPath in assetPaths)
         {
@@ -85,8 +94,11 @@ public class Integrity_Loader : MonoBehaviour
             {
                 string[] files = Directory.GetFiles(folderPath);
                 totalFiles += files.Length;
+                Debug.Log($"Folder: {folderPath}, Files count: {files.Length}");
             }
         }
+
+        Debug.Log($"Total files to process: {totalFiles}");
 
         float elapsedTime = 0f;
         float baseProgress = 0.05f;
@@ -94,6 +106,7 @@ public class Integrity_Loader : MonoBehaviour
         LoadText.text = "Loading Assets";
         LoadText.fontSize = 36;
 
+        int processedFiles = 0;
         foreach (string folderPath in assetPaths)
         {
             if (Directory.Exists(folderPath))
@@ -103,62 +116,154 @@ public class Integrity_Loader : MonoBehaviour
                 {
                     yield return null;
                     elapsedTime += Time.deltaTime;
+                    processedFiles++;
                     progress = baseProgress + (elapsedTime / totalFiles);
-                    CircleImg.fillAmount = progress;
                     int percentage = Mathf.RoundToInt(progress * 100f);
+
+                    Debug.Log($"Processing file: {currentFilePath}");
+                    Debug.Log($"Progress: {percentage}% ({processedFiles}/{totalFiles})");
+                    Debug.Log($"Elapsed Time: {elapsedTime}");
+
+                    CircleImg.fillAmount = progress;
                     txtProgress.text = percentage.ToString();
                     yield return new WaitForSeconds(0.1f);
                 }
             }
         }
+
+        Debug.Log("Asset loading complete");
+        float previousProgress = progress;
+        float finalIntegrityCheckProgress = previousProgress;
+        yield return StartCoroutine(DummyIntegrityCheck(progress));
+
+        progress = previousProgress;
+        CircleImg.fillAmount = progress;
+
+        progress = 1f;
+        CircleImg.fillAmount = progress;
+        txtProgress.text = "100";
+        LoadText.text = "Done";
+
+        yield return new WaitForSeconds(fadeOutTime);
+        End_Flag = true;
+        Debug.Log("LOADING COMPLETE");
+        CanvasGroup canvasGroup = gameObject.GetComponent<CanvasGroup>();
+        if (canvasGroup == null)
+        {
+            canvasGroup = gameObject.AddComponent<CanvasGroup>();
+        }
+
+        float currentTime = 0f;
+        while (currentTime < fadeOutTime)
+        {
+            float alpha = Mathf.Lerp(1f, 0f, currentTime / fadeOutTime);
+            canvasGroup.alpha = alpha;
+            CircleImg.color = new Color(CircleImg.color.r, CircleImg.color.g, CircleImg.color.b, alpha);
+            txtProgress.color = new Color(txtProgress.color.r, txtProgress.color.g, txtProgress.color.b, alpha);
+            LoadText.color = new Color(LoadText.color.r, LoadText.color.g, LoadText.color.b, alpha);
+
+            currentTime += Time.deltaTime;
+            yield return null;
+        }
+
+        canvasGroup.alpha = 0f;
+        CircleImg.color = new Color(CircleImg.color.r, CircleImg.color.g, CircleImg.color.b, 0f);
+        LoadText.color = new Color(LoadText.color.r, LoadText.color.g, LoadText.color.b, 0f);
+        CircleImg.gameObject.SetActive(false);
+        txtProgress.gameObject.SetActive(false);
+        LoadText.gameObject.SetActive(false);
     }
 
-
-    IEnumerator DownloadFolder(string folderPath, string repoUrl)
+    IEnumerator DownloadFile(string relativePath, string fileUrl, int currentFileIndex, int totalMissingFiles)
     {
-        Debug.Log($"Cloning repository: {repoUrl}");
+        string fullPath = Path.Combine(Directory.GetParent(Directory.GetParent(Application.dataPath).FullName).FullName, "models", Path.GetDirectoryName(relativePath));
+        string filePath = Path.Combine(fullPath, Path.GetFileName(relativePath));
+        string fileName = Path.GetFileName(relativePath);
 
-        string fullPath = Path.Combine(Directory.GetParent(Directory.GetParent(Application.dataPath).FullName).FullName, "models", folderPath);
-        Debug.Log($"Full clone path: {fullPath}");
+        if (File.Exists(filePath))
+        {
+            Debug.Log($"File already exists: {filePath}. Skipping download.");
+            yield break;
+        }
 
-        // Create the directory if it doesn't exist
         if (!Directory.Exists(fullPath))
         {
             Directory.CreateDirectory(fullPath);
         }
-
-        // Run the git clone command using a process
-        var process = new Process
+        if (downloadProgressSlider != null)
         {
-            StartInfo = new ProcessStartInfo
+            downloadProgressSlider.value = 0f;
+            downloadProgressSlider.gameObject.SetActive(true);
+            downloadProgressText.gameObject.SetActive(true);
+            downloadText.gameObject.SetActive(true);
+        }
+
+        if (downloadText != null)
+        {
+            downloadText.text = $"Downloading Resources";
+        }
+
+        using (UnityWebRequest www = UnityWebRequest.Get(fileUrl))
+        {
+            var operation = www.SendWebRequest();
+
+            while (!operation.isDone)
             {
-                FileName = "git",
-                Arguments = $"clone --depth 1 {repoUrl} \"{fullPath}\"",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
+                float downloadProgress = www.downloadProgress;
+                float overallProgress = (currentFileIndex + downloadProgress) / totalMissingFiles;
+                if (downloadProgressSlider != null)
+                {
+                    downloadProgressSlider.value = overallProgress;
+                }
+                if (downloadProgressText != null)
+                {
+                    downloadProgressText.text = $"{(int)Math.Round(overallProgress * 100f)}%";
+                }
+                yield return null;
             }
-        };
 
-        process.Start();
+            if (www.result == UnityWebRequest.Result.Success)
+            {
+                if (www.downloadHandler.data != null && www.downloadHandler.data.Length > 0)
+                {
+                    File.WriteAllBytes(filePath, www.downloadHandler.data);
+                    Debug.Log($"File downloaded successfully: {filePath}");
+                    Debug.Log($"Total file size: {www.downloadHandler.data.Length} bytes");
 
-        // Read output and error streams asynchronously to prevent blocking
-        while (!process.HasExited)
-        {
-            Debug.Log(process.StandardOutput.ReadLine());
-            Debug.LogError(process.StandardError.ReadLine());
-            yield return null;
+                    if (downloadProgressSlider != null)
+                    {
+                        downloadProgressSlider.value = (currentFileIndex + 1f) / totalMissingFiles;
+                    }
+                }
+                else
+                {
+                    Debug.LogError("Download failed: Received data is null or empty.");
+                }
+            }
+            else
+            {
+                Debug.LogError($"Download failed: {www.error}");
+                if (downloadProgressText != null)
+                {
+                    downloadProgressText.text = "Download Failed!";
+                }
+                if (downloadText != null)
+                {
+                    downloadText.text = $"Download Failed: {fileName}";
+                }
+            }
+
+            if (currentFileIndex == totalMissingFiles - 1)
+            {
+                if (downloadProgressSlider != null)
+                {
+                    downloadProgressSlider.gameObject.SetActive(false);
+                    downloadProgressText.gameObject.SetActive(false);
+                    downloadText.gameObject.SetActive(false);
+                }
+            }
         }
 
-        if (process.ExitCode == 0)
-        {
-            Debug.Log("Repository cloned successfully.");
-        }
-        else
-        {
-            Debug.LogError($"Failed to clone repository. Exit code: {process.ExitCode}");
-        }
     }
 
     IEnumerator DummyIntegrityCheck(float startingProgress)
@@ -182,7 +287,6 @@ public class Integrity_Loader : MonoBehaviour
         yield return new WaitForSeconds(3f);
         yield return StartCoroutine(AdditionalUpdateCheck(progress));
         yield return new WaitForSeconds(3f);
-
     }
 
     IEnumerator AdditionalUpdateCheck(float startingProgress)
@@ -207,13 +311,25 @@ public class Integrity_Loader : MonoBehaviour
         yield return new WaitForSeconds(3f);
         yield return StartCoroutine(CleanUp(progress));
         yield return new WaitForSeconds(2f);
-
     }
+
     IEnumerator CleanUp(float startingProgress)
     {
         LoadText.text = "Getting Things Ready";
         float CleanUpDuration = 2f;
         float elapsedTime = 0f;
+
+        try
+        {
+            CleanupTemporaryFiles();
+            ClearCachedData();
+            System.GC.Collect();
+            System.GC.WaitForPendingFinalizers();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Cleanup error: {e.Message}");
+        }
 
         while (elapsedTime < CleanUpDuration)
         {
@@ -228,6 +344,33 @@ public class Integrity_Loader : MonoBehaviour
 
             elapsedTime += Time.deltaTime;
         }
+    }
 
+    private void CleanupTemporaryFiles()
+    {
+        string modelsFolderPath = Path.Combine(Directory.GetParent(Directory.GetParent(Application.dataPath).FullName).FullName, "models");
+
+        if (Directory.Exists(modelsFolderPath))
+        {
+            string[] tempFiles = Directory.GetFiles(modelsFolderPath, "*.tmp", SearchOption.AllDirectories);
+            foreach (string tempFile in tempFiles)
+            {
+                try
+                {
+                    File.Delete(tempFile);
+                    Debug.Log($"Deleted temporary file: {tempFile}");
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning($"Could not delete temp file {tempFile}: {e.Message}");
+                }
+            }
+        }
+    }
+
+    private void ClearCachedData()
+    {
+        Caching.ClearCache();
+        Debug.Log("Cleared application cache");
     }
 }
