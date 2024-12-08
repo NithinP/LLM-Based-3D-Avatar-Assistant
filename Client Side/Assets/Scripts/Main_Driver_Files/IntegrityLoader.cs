@@ -62,13 +62,38 @@ public class Integrity_Loader : MonoBehaviour
 
     IEnumerator LoadAssetsAsync()
     {
-        var fileSources = new Dictionary<string, string>
-        {
-            { "../Models/XLMRoberta-Alexa-Intents-Classification/pytorch_model.bin", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/pytorch_model.bin" },
-            { "../Models/XLMRoberta-Alexa-Intents-Classification/optimizer.pt", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/optimizer.pt" }
-        };
 
         string modelsFolderPath = Path.Combine(Application.dataPath, "..", "models");
+        string classificationFolderPath = Path.Combine(modelsFolderPath, "XLMRoberta-Alexa-Intents-Classification");
+
+        if (!Directory.Exists(modelsFolderPath))
+        {
+            Directory.CreateDirectory(modelsFolderPath);
+            Debug.Log($"Created models folder {modelsFolderPath}");
+        }
+
+        if (!Directory.Exists(classificationFolderPath))
+        {
+            Directory.CreateDirectory(classificationFolderPath);
+            Debug.Log($"Created classification folder {classificationFolderPath}");
+        }
+
+        var fileSources = new Dictionary<string, string>
+        {
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/optimizer.pt", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/optimizer.pt" },
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/pytorch_model.bin", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/pytorch_model.bin" },
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/rng_state.pth", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/rng_state.pth" },
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/predict.py", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/predict.py" },
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/config.json", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/blob/main/config.json" },
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/scheduler.pt", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/blob/main/scheduler.pt" },
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/sentencepiece.bpe.model", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/blob/main/sentencepiece.bpe.model" },
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/special_tokens_map.json", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/blob/main/special_tokens_map.json" },
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/tokenizer.json", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/blob/main/tokenizer.json" },
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/tokenizer_config.json", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/tokenizer_config.json" },
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/trainer_state.json", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/trainer_state.json" },
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/training_args.bin", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/training_args.bin" }
+
+        };
 
         var missingFiles = fileSources
             .Where(pair => !File.Exists(Path.Combine(modelsFolderPath, pair.Key)))
@@ -190,6 +215,7 @@ public class Integrity_Loader : MonoBehaviour
         {
             Directory.CreateDirectory(fullPath);
         }
+
         if (downloadProgressSlider != null)
         {
             downloadProgressSlider.value = 0f;
@@ -205,30 +231,39 @@ public class Integrity_Loader : MonoBehaviour
 
         using (UnityWebRequest www = UnityWebRequest.Get(fileUrl))
         {
+            // Use DownloadHandlerFile with file path instead of FileStream
+            www.downloadHandler = new DownloadHandlerFile(filePath);
+
             var operation = www.SendWebRequest();
 
             while (!operation.isDone)
             {
                 float downloadProgress = www.downloadProgress;
                 float overallProgress = (currentFileIndex + downloadProgress) / totalMissingFiles;
+
                 if (downloadProgressSlider != null)
                 {
                     downloadProgressSlider.value = overallProgress;
                 }
+
                 if (downloadProgressText != null)
                 {
                     downloadProgressText.text = $"{(int)Math.Round(overallProgress * 100f)}%";
                 }
+
                 yield return null;
             }
 
+            // Check for download success
             if (www.result == UnityWebRequest.Result.Success)
             {
-                if (www.downloadHandler.data != null && www.downloadHandler.data.Length > 0)
+                Debug.Log($"File downloaded successfully: {filePath}");
+
+                // Additional verification
+                FileInfo fileInfo = new FileInfo(filePath);
+                if (fileInfo.Exists && fileInfo.Length > 0)
                 {
-                    File.WriteAllBytes(filePath, www.downloadHandler.data);
-                    Debug.Log($"File downloaded successfully: {filePath}");
-                    Debug.Log($"Total file size: {www.downloadHandler.data.Length} bytes");
+                    Debug.Log($"Total file size: {fileInfo.Length} bytes");
 
                     if (downloadProgressSlider != null)
                     {
@@ -237,33 +272,41 @@ public class Integrity_Loader : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogError("Download failed: Received data is null or empty.");
+                    Debug.LogError("Download failed: File is empty or could not be created.");
                 }
             }
             else
             {
                 Debug.LogError($"Download failed: {www.error}");
+
+                // Delete incomplete file
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                }
+
                 if (downloadProgressText != null)
                 {
                     downloadProgressText.text = "Download Failed!";
                 }
+
                 if (downloadText != null)
                 {
                     downloadText.text = $"Download Failed: {fileName}";
                 }
             }
-
-            if (currentFileIndex == totalMissingFiles - 1)
-            {
-                if (downloadProgressSlider != null)
-                {
-                    downloadProgressSlider.gameObject.SetActive(false);
-                    downloadProgressText.gameObject.SetActive(false);
-                    downloadText.gameObject.SetActive(false);
-                }
-            }
         }
 
+        // Hide progress UI when all downloads are complete
+        if (currentFileIndex == totalMissingFiles - 1)
+        {
+            if (downloadProgressSlider != null)
+            {
+                downloadProgressSlider.gameObject.SetActive(false);
+                downloadProgressText.gameObject.SetActive(false);
+                downloadText.gameObject.SetActive(false);
+            }
+        }
     }
 
     IEnumerator DummyIntegrityCheck(float startingProgress)

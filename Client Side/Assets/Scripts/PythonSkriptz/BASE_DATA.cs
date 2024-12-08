@@ -251,12 +251,14 @@ public class MenuItem_KODEZ_Class
                 try:
                     UnityEngine.Debug.Log('Starting classification process...')
                     input_text = " + $"\"{inputText.Replace("\"", "\\\"")}\"" + @"
-    
-                    # Load model and tokenizer
-                    model_name = 'qanastek/XLMRoberta-Alexa-Intents-Classification'
+                    
+                    models_folder_path = UnityEngine.Application.dataPath + ""/../models""
+                    classification_folder_path = os.path.join(models_folder_path, ""XLMRoberta-Alexa-Intents-Classification"")
+
+                    model_name = '../Models/XLMRoberta-Alexa-Intents-Classification'
                     UnityEngine.Debug.Log('Loading tokenizer and model...')
-                    tokenizer = AutoTokenizer.from_pretrained(model_name)
-                    model = AutoModelForSequenceClassification.from_pretrained(model_name)
+                    tokenizer = AutoTokenizer.from_pretrained(classification_folder_path)
+                    model = AutoModelForSequenceClassification.from_pretrained(classification_folder_path)
     
                     # Create classifier
                     classifier = TextClassificationPipeline(model=model, tokenizer=tokenizer)
