@@ -17,6 +17,10 @@ public class Integrity_Loader : MonoBehaviour
     [SerializeField] TextMeshProUGUI txtProgress;
     [SerializeField] TextMeshProUGUI LoadText;
 
+    [SerializeField] AudioSource musicSource;
+    [SerializeField] AudioClip loadingMusic;
+    [SerializeField] float musicFadeOutDuration = 2f;
+
     [SerializeField][Range(0, 1)] float progress = 0f;
     [SerializeField] float fadeOutTime = 1f;
 
@@ -25,8 +29,13 @@ public class Integrity_Loader : MonoBehaviour
     string[] assetPaths = new string[]
     {
         "Assets/Character",
+        "Assets/Character",
         "Assets/Animations",
         "Assets/Fonts",
+        "Assets/Soundz",
+        "Assets/Outfits",
+        "Assets/Scripts"
+
     };
 
     [SerializeField] Slider downloadProgressSlider;
@@ -37,8 +46,16 @@ public class Integrity_Loader : MonoBehaviour
     {
         if (!bypass)
         {
+
+            if (musicSource != null && loadingMusic != null)
+            {
+                musicSource.clip = loadingMusic;
+                musicSource.loop = true;
+                musicSource.Play();
+            }
             CircleImg.fillAmount = 0f;
             txtProgress.text = "0";
+            LoadText.text = "Starting Up";
             CircleImg.gameObject.SetActive(true);
             txtProgress.gameObject.SetActive(true);
             LoadText.gameObject.SetActive(true);
@@ -48,6 +65,25 @@ public class Integrity_Loader : MonoBehaviour
 
             StartCoroutine(CheckInternetAndLoadAssets());
         }
+    }
+
+    IEnumerator FadeMusicOut()
+    {
+        if (musicSource == null || loadingMusic == null) yield break;
+
+        float startVolume = musicSource.volume;
+        float elapsedTime = 0f;
+
+        while (elapsedTime < musicFadeOutDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float newVolume = Mathf.Lerp(startVolume, 0f, elapsedTime / musicFadeOutDuration);
+            musicSource.volume = newVolume;
+            yield return null;
+        }
+
+        musicSource.Stop();
+        musicSource.volume = startVolume;
     }
 
     IEnumerator CheckInternetAndLoadAssets()
@@ -170,6 +206,7 @@ public class Integrity_Loader : MonoBehaviour
         LoadText.text = "Done";
 
         yield return new WaitForSeconds(fadeOutTime);
+        yield return StartCoroutine(FadeMusicOut());
         End_Flag = true;
         Debug.Log("LOADING COMPLETE");
         CanvasGroup canvasGroup = gameObject.GetComponent<CanvasGroup>();
