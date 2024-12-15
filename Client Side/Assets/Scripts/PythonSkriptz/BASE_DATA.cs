@@ -243,39 +243,57 @@ public class MenuItem_KODEZ_Class
         try
         {
             string pythonScript = @"
-                import sys
-                import traceback
-                from transformers import AutoTokenizer, AutoModelForSequenceClassification, TextClassificationPipeline
-                import UnityEngine
+import sys
+import os
+import traceback
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, TextClassificationPipeline
 
-                try:
-                    UnityEngine.Debug.Log('Starting classification process...')
-                    input_text = " + $"\"{inputText.Replace("\"", "\\\"")}\"" + @"
-                    
-                    models_folder_path = UnityEngine.Application.dataPath + ""/../models""
-                    classification_folder_path = os.path.join(models_folder_path, ""XLMRoberta-Alexa-Intents-Classification"")
+import UnityEngine
 
-                    model_name = '../Models/XLMRoberta-Alexa-Intents-Classification'
-                    UnityEngine.Debug.Log('Loading tokenizer and model...')
-                    tokenizer = AutoTokenizer.from_pretrained(classification_folder_path)
-                    model = AutoModelForSequenceClassification.from_pretrained(classification_folder_path)
-    
-                    # Create classifier
-                    classifier = TextClassificationPipeline(model=model, tokenizer=tokenizer)
-    
-                    # Run classification
-                    UnityEngine.Debug.Log(f'Classifying text: {input_text}')
-                    result = classifier(input_text)
-                    
-                    # Log the result to Unity
-                    UnityEngine.Debug.Log(f""[INTENT_OUTPUT]{result[0]['label']}"")
-        
-                except Exception as e:
-                    error_msg = f'Classification error: {str(e)}\n{traceback.format_exc()}'
-                    UnityEngine.Debug.LogError(f""[INTENT_ERROR]{error_msg}"")
+def normalize_path(path):
+    return os.path.normpath(path)
 
-                sys.stdout.flush()
-                ";
+def initialize_classifier():
+    try:
+        project_root = os.path.dirname(os.path.dirname(UnityEngine.Application.dataPath))
+        classification_folder_path = os.path.join(project_root, 'models', 'xlmroberta-alexa-intents-classification')
+        classification_folder_path = normalize_path(classification_folder_path)
+
+        UnityEngine.Debug.Log(f'Loading model from path: {classification_folder_path}')
+
+        tokenizer = AutoTokenizer.from_pretrained(classification_folder_path, local_files_only=True)
+        model = AutoModelForSequenceClassification.from_pretrained(classification_folder_path)
+        return TextClassificationPipeline(model=model, tokenizer=tokenizer)
+
+    except Exception as init_error:
+        UnityEngine.Debug.LogError(f'Classifier initialization error: {str(init_error)}')
+        raise
+
+
+try:
+    input_text = '" + inputText.Replace("\"", "\\\"") + @"'
+    if not input_text or input_text.strip() == '':
+        raise ValueError('Input text cannot be empty')
+    classifier = initialize_classifier()
+
+    UnityEngine.Debug.Log(f'Classifying text: {input_text}')
+    result = classifier(input_text)
+    if not result:
+        raise ValueError('Classification failed or returned no results')
+
+    intent_label = result[0]['label']
+    confidence = result[0]['score']
+
+    output_message = f'[intent_output] label: {intent_label}, confidence: {confidence:.4f}'
+    UnityEngine.Debug.Log(output_message)
+
+except Exception as e:
+    error_msg = f'Classification error: {str(e)}\n{traceback.format_exc()}'
+    UnityEngine.Debug.LogError(f'[intent_error] {error_msg}')
+sys.stdout.flush()
+
+
+            ";
 
             Application.logMessageReceived += HandleLog;
             PythonRunner.RunString(pythonScript);

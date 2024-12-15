@@ -115,49 +115,49 @@ public class Integrity_Loader : MonoBehaviour
 
         var fileSources = new Dictionary<string, string>
         {
-            { "XLMRoberta-Alexa-Intents-Classification/optimizer.pt", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/optimizer.pt" },
-            { "XLMRoberta-Alexa-Intents-Classification/pytorch_model.bin", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/pytorch_model.bin" }
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/rng_state.pth", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/rng_state.pth" },
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/predict.py", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/predict.py" },
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/config.json", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/config.json" },
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/scheduler.pt", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/scheduler.pt" },
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/sentencepiece.bpe.model", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/sentencepiece.bpe.model" },
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/special_tokens_map.json", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/special_tokens_map.json" },
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/tokenizer.json", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/tokenizer.json" },
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/tokenizer_config.json", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/tokenizer_config.json" },
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/trainer_state.json", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/trainer_state.json" },
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/training_args.bin", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/training_args.bin" },
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/optimizer.pt", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/optimizer.pt" },
+            { "../Models/XLMRoberta-Alexa-Intents-Classification/pytorch_model.bin", "https://huggingface.co/qanastek/XLMRoberta-Alexa-Intents-Classification/resolve/main/pytorch_model.bin" }
         };
 
-        // Check if all files exist before proceeding with download
-        bool allFilesExist = true;
-        foreach (var file in fileSources.Keys)
-        {
-            string filePath = Path.Combine(modelsFolderPath, "XLMRoberta-Alexa-Intents-Classification", file);
-            if (!File.Exists(filePath))
+       var missingFiles = fileSources
+            .Where(pair => 
             {
-                allFilesExist = false;
-                break;
-            }
-        }
+                string fullPath = Path.Combine(modelsFolderPath, pair.Key);
+                bool fileExists = File.Exists(fullPath);
+                
+                if (fileExists)
+                {
+                    Debug.Log($"File already exists, skipping download: {fullPath}");
+                }
+                
+                return !fileExists;
+            })
+            .ToList();
 
-        if (allFilesExist)
+        if (missingFiles.Any())
         {
-            Debug.Log("All files already exist. Skipping download.");
-            if (downloadProgressSlider != null)
-            {
-                downloadProgressSlider.gameObject.SetActive(false);
-                downloadProgressText.gameObject.SetActive(false);
-                downloadText.gameObject.SetActive(false);
-            }
-            yield return null; // Skip download and proceed with loading assets
-        }
-        else
-        {
-            Debug.Log("Some files are missing, starting download.");
-            // Start downloading missing files
-            var missingFiles = fileSources
-                .Where(pair => !File.Exists(Path.Combine(modelsFolderPath, "XLMRoberta-Alexa-Intents-Classification", pair.Key)))
-                .ToList();
-
+            Debug.Log($"Downloading {missingFiles.Count} missing files.");
             for (int i = 0; i < missingFiles.Count; i++)
             {
                 var missingFile = missingFiles[i];
                 yield return StartCoroutine(DownloadFile(missingFile.Key, missingFile.Value, i, missingFiles.Count));
             }
         }
+        else
+        {
+            Debug.Log("All required files are already present. Skipping download.");
+        }
 
-        // Process the asset files (regardless of download completion)
         int totalFiles = 0;
         foreach (string folderPath in assetPaths)
         {
@@ -250,8 +250,8 @@ public class Integrity_Loader : MonoBehaviour
     IEnumerator DownloadFile(string relativePath, string fileUrl, int currentFileIndex, int totalMissingFiles)
     {
         string fullPath = Path.Combine(Directory.GetParent(Directory.GetParent(Application.dataPath).FullName).FullName, "models", Path.GetDirectoryName(relativePath));
-        string tempFilePath = Path.Combine(fullPath, Path.GetFileNameWithoutExtension(relativePath) + ".tmp");
         string finalFilePath = Path.Combine(fullPath, Path.GetFileName(relativePath));
+        string tempFilePath = Path.Combine(fullPath, Path.GetFileNameWithoutExtension(relativePath) + ".tmp");
 
         if (File.Exists(finalFilePath))
         {
@@ -276,14 +276,19 @@ public class Integrity_Loader : MonoBehaviour
         {
             downloadText.text = $"Downloading Resources";
         }
+        bool isJsonFile = Path.GetExtension(relativePath).Equals(".json", StringComparison.OrdinalIgnoreCase);
+        string downloadPath = isJsonFile ? finalFilePath : tempFilePath;
 
         using (UnityWebRequest www = UnityWebRequest.Get(fileUrl))
         {
-            www.downloadHandler = new DownloadHandlerFile(tempFilePath);
+            www.downloadHandler = new DownloadHandlerFile(downloadPath);
             var operation = www.SendWebRequest();
-
-            // Register for application quit event to handle unexpected exits
-            Application.quitting += () => DeleteTempFile(tempFilePath);
+            Application.quitting += () => {
+                if (!isJsonFile && File.Exists(downloadPath))
+                {
+                    DeleteTempFile(downloadPath);
+                }
+            };
 
             while (!operation.isDone)
             {
@@ -303,18 +308,19 @@ public class Integrity_Loader : MonoBehaviour
                 yield return null;
             }
 
-            // Handle download completion or failure
             if (www.result == UnityWebRequest.Result.Success)
             {
                 Debug.Log($"File downloaded successfully: {finalFilePath}");
-                FileInfo fileInfo = new FileInfo(tempFilePath);
+                FileInfo fileInfo = new FileInfo(downloadPath);
 
                 if (fileInfo.Exists && fileInfo.Length > 0)
                 {
                     Debug.Log($"Total file size: {fileInfo.Length} bytes");
 
-                    // Rename the temp file to the final file name
-                    File.Move(tempFilePath, finalFilePath);
+                    if (!isJsonFile)
+                    {
+                        File.Move(downloadPath, finalFilePath);
+                    }
 
                     if (downloadProgressSlider != null)
                     {
@@ -324,13 +330,19 @@ public class Integrity_Loader : MonoBehaviour
                 else
                 {
                     Debug.LogError("Download failed: File is empty or could not be created.");
-                    DeleteTempFile(tempFilePath);
+                    if (!isJsonFile)
+                    {
+                        DeleteTempFile(downloadPath);
+                    }
                 }
             }
             else
             {
                 Debug.LogError($"Download failed: {www.error}");
-                DeleteTempFile(tempFilePath);
+                if (!isJsonFile)
+                {
+                    DeleteTempFile(downloadPath);
+                }
 
                 if (downloadProgressText != null)
                 {
@@ -343,8 +355,6 @@ public class Integrity_Loader : MonoBehaviour
                 }
             }
         }
-
-        // Deactivate UI elements if it's the last file
         if (currentFileIndex == totalMissingFiles - 1)
         {
             if (downloadProgressSlider != null)
