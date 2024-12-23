@@ -85,6 +85,7 @@ https://ieeexplore.ieee.org/document/10576146
 3. [Install CUDA 11.7 if you have an Nvidia GPU](https://developer.nvidia.com/cuda-11-7-0-download-archive?target_os=Windows&target_arch=x86_64&target_version=10&target_type=exe_local)
 4. [Install Visual Studio Community 2022](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community&channel=Release&version=VS2022&source=VSLandingPage&cid=2030&passive=false) and select `Desktop Development with C++` in the install options
 5. Install Unity
+6. Install [FFMPEG](https://ffmpeg.org/)
 
 ## How to run / Steps to reproduce
 <br>
