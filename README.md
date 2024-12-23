@@ -2,21 +2,35 @@
 <br />
 <div align="center">
   <a href="https://github.com/NeuralHarbour/LLM-Based-3D-Avatar-Assistant/v2.0">
-    <img src="Images/logo.png" alt="Logo" width="650" height="150">
+    <img src="Images/logo.png" alt="Logo" width="450" height="100">
   </a>
 
   <h3 align="center">LLM Based Holographic Assistant</h3>
-
   <p align="center">
     Shaping Perspectives Shifting Realities
     <br />
+</p>
+
+<div align="center">
+    <a href="https://github.com/NeuralHarbour/LLM-Based-3D-Avatar-Assistant" target="_blank">
+        <img src="https://img.shields.io/badge/made_with-%E2%9D%A4-red?style=for-the-badge&labelColor=pink" alt="madewithlove">
+    </a>
+    <h4>Follow Us</h4>
+    <a href="https://huggingface.co/NeuralHarbourAI" target="_blank">
+        <img src="https://img.shields.io/badge/🤗%20-Spaces-yellow.svg?style=for-the-badge" alt="Huggingface Spaces">
+    </a>
     <br />
-    ·
-    <a href="https://github.com/NeuralHarbour/LLM-Based-3D-Avatar-Assistant/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/NeuralHarbour/LLM-Based-3D-Avatar-Assistant/issues">Request Feature</a>
-  </p>
+    <a href="https://x.com/NeuralHarbourAI" target="_blank">
+        <img src="https://img.shields.io/badge/X-%2312100E.svg?style=for-the-badge&logo=x&logoColor=white" alt="X">
+    </a>
+    <a href="https://www.linkedin.com/company/neuralharbour-ai/?viewAsMember=true" target="_blank">
+        <img src="https://img.shields.io/badge/LinkedIn-%230A66C2.svg?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
+    </a>
+    <a href="https://instagram.com/neuralharbourai" target="_blank">
+        <img src="https://img.shields.io/badge/Instagram-%23E4405F.svg?style=for-the-badge&logo=instagram&logoColor=white" alt="Instagram">
+    </a>
 </div>
+
 
 <p align="center">
   <a href="https://count.getloli.com" target="_blank">
