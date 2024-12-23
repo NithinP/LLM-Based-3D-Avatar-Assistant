@@ -4,12 +4,10 @@
   <a href="https://github.com/NeuralHarbour/LLM-Based-3D-Avatar-Assistant/v2.0">
     <img src="Images/logo.png" alt="Logo" width="450" height="100">
   </a>
+</div>
 
-  <h3 align="center">LLM Based Holographic Assistant</h3>
-  <p align="center">
-    Shaping Perspectives Shifting Realities
-    <br />
-</p>
+<h3 align="center">LLM Based Holographic Assistant</h3>
+<p align="center">Shaping Perspectives Shifting Realities</p>
 
 <div align="center">
     <a href="https://github.com/NeuralHarbour/LLM-Based-3D-Avatar-Assistant" target="_blank">
@@ -19,7 +17,6 @@
     <a href="https://huggingface.co/NeuralHarbourAI" target="_blank">
         <img src="https://img.shields.io/badge/🤗%20-Spaces-yellow.svg?style=for-the-badge" alt="Huggingface Spaces">
     </a>
-    <br />
     <a href="https://x.com/NeuralHarbourAI" target="_blank">
         <img src="https://img.shields.io/badge/X-%2312100E.svg?style=for-the-badge&logo=x&logoColor=white" alt="X">
     </a>
@@ -30,7 +27,6 @@
         <img src="https://img.shields.io/badge/Instagram-%23E4405F.svg?style=for-the-badge&logo=instagram&logoColor=white" alt="Instagram">
     </a>
 </div>
-
 
 <p align="center">
   <a href="https://count.getloli.com" target="_blank">
@@ -106,7 +102,7 @@ https://ieeexplore.ieee.org/document/10576146
 1. Create a new project in unity with URP Settings
 <br>
 <br>
-<img src="Images/Step1.png" alt="Step1" width="900" height="480">
+<img src="Images/Step1.png" alt="Step1" width="600" height="280">
 <br>
 2. Replace the assets folder with the one in this branch
 <br>
@@ -114,12 +110,12 @@ https://ieeexplore.ieee.org/document/10576146
 3. Open the Unity Scene from the scenes folder
 <br>
 <br>
-<img src="Images/Step3.png" alt="Step3" width="900" height="480">
+<img src="Images/Step3.png" alt="Step3" width="600" height="280">
 <br>
 4. Insert the API keys into the .env files
 <br>
 <br>
-<img src="Images/Step4.png" alt="Step4" width="900" height="480">
+<img src="Images/Step4.png" alt="Step4" width="600" height="280">
 <br>
 5. Run the STT service using: <strong>python STT.py</strong>
 <br>
