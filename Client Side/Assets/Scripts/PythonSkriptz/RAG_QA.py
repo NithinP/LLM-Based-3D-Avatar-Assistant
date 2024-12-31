@@ -16,7 +16,7 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 import UnityEngine
 
 
-base_data_path = Path("D:/3DavatarAssistant/Backend/Client/Client Side/Assets/Scripts/PythonSkriptz/BASE_DATA.py")
+base_data_path = Path("./Assets/Scripts/PythonSkriptz/BASE_DATA.py")
 
 sys.path.insert(0, str(base_data_path.parent))
 
