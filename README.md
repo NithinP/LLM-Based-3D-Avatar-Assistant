@@ -2,7 +2,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/NeuralHarbour/LLM-Based-3D-Avatar-Assistant">
-    <img src="Images/logo.png" alt="Logo" width="450" height="160">
+    <img src="Images/logo_new.png" alt="Logo" width="450" height="160">
   </a>
 </div>
 
